@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2AA198"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="20" fill="url(#g)"/>
+  <path d="M26 90c10-20 22-26 38-32 10-4 12-7 12-12 0-6-5-10-12-10-9 0-14 6-16 12" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M66 70c8 0 14 6 14 14s-6 14-14 14-14-6-14-14 6-14 14-14z" fill="#FFFFFF" fill-opacity="0.2"/>
+  <text x="64" y="104" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="22" font-weight="700" fill="#FFFFFF">SP</text>
+  <title>Safe Path</title>
+</svg>

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080" viewBox="0 0 720 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef2f7"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+  <rect x="60" y="80" width="600" height="920" rx="20" fill="#ffffff" stroke="#e5e7eb"/>
+  <g transform="translate(90,120)">
+    <circle cx="28" cy="28" r="22" fill="#16a34a"/>
+    <rect x="66" y="8" width="340" height="18" rx="4" fill="#0ea5e9"/>
+    <rect x="66" y="34" width="220" height="14" rx="4" fill="#94a3b8"/>
+  </g>
+  <g transform="translate(90,210)" fill="#e5e7eb">
+    <rect x="0" y="0" width="540" height="2"/>
+  </g>
+  <g transform="translate(110,250)">
+    <rect x="0" y="0" width="180" height="14" rx="4" fill="#94a3b8"/>
+    <rect x="0" y="24" width="480" height="18" rx="4" fill="#cbd5e1"/>
+
+    <rect x="0" y="70" width="180" height="14" rx="4" fill="#94a3b8"/>
+    <rect x="0" y="94" width="480" height="18" rx="4" fill="#cbd5e1"/>
+
+    <rect x="0" y="140" width="180" height="14" rx="4" fill="#94a3b8"/>
+    <rect x="0" y="164" width="300" height="18" rx="4" fill="#cbd5e1"/>
+
+    <rect x="0" y="210" width="180" height="14" rx="4" fill="#94a3b8"/>
+    <rect x="0" y="234" width="220" height="18" rx="4" fill="#cbd5e1"/>
+  </g>
+  <g transform="translate(90,680)">
+    <rect x="0" y="0" width="540" height="2" fill="#e5e7eb"/>
+  </g>
+  <g transform="translate(110,720)">
+    <rect x="0" y="0" width="220" height="14" rx="4" fill="#94a3b8"/>
+    <rect x="0" y="26" width="500" height="200" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  </g>
+  <g transform="translate(110,960)">
+    <rect x="0" y="0" width="160" height="14" rx="4" fill="#94a3b8"/>
+    <rect x="0" y="24" width="260" height="24" rx="6" fill="#e2e8f0"/>
+  </g>
+  <g fill="#64748b" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+    <text x="360" y="60" text-anchor="middle" font-size="20">Payment Proof Placeholder</text>
+  </g>
+</svg>
