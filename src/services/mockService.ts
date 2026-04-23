@@ -38,8 +38,8 @@ const mockUsers = [
   }
 ];
 
-// Mock Drivers Data
-const mockDrivers = [
+// Mock caregivers Data
+const mockcaregivers = [
   {
     id: "1",
     name: "Mike Johnson",
@@ -89,7 +89,7 @@ const mockTrips = [
   {
     id: "1",
     riderId: "1",
-    driverId: "1",
+    caregiverId: "1",
     fromAddress: "Central World, Bangkok",
     toAddress: "Suvarnabhumi Airport",
     status: "completed",
@@ -101,7 +101,7 @@ const mockTrips = [
   {
     id: "2",
     riderId: "2",
-    driverId: "2",
+    caregiverId: "2",
     fromAddress: "Siam Paragon, Bangkok",
     toAddress: "Chatuchak Weekend Market",
     status: "in_progress",
@@ -113,7 +113,7 @@ const mockTrips = [
   {
     id: "3",
     riderId: "3",
-    driverId: null,
+    caregiverId: null,
     fromAddress: "MBK Center, Bangkok",
     toAddress: "Victory Monument",
     status: "requested",
@@ -177,16 +177,16 @@ const mockRequirements = [
   },
   {
     id: "2",
-    role: "driver",
-    name: "Driver License",
+    role: "caregiver",
+    name: "caregiver License",
     kind: "file",
-    description: "Upload your driver license",
+    description: "Upload your caregiver license",
     required: true,
     createdAt: "2024-01-01T00:00:00Z"
   },
   {
     id: "3",
-    role: "driver",
+    role: "caregiver",
     name: "Vehicle Registration",
     kind: "file",
     description: "Upload vehicle registration document",
@@ -198,12 +198,12 @@ const mockRequirements = [
 // Mock Metrics Data
 const mockMetrics = {
   totalUsers: 1250,
-  activeDrivers: 85,
+  activecaregivers: 85,
   totalTrips: 3420,
   revenueCents: 1250000,
   avgTripTime: 25,
   cancellationRate: 3.2,
-  driverUtilization: 78.5,
+  caregiverUtilization: 78.5,
   weeklyTrips: [
     { name: "Mon", trips: 520 },
     { name: "Tue", trips: 480 },
@@ -230,7 +230,7 @@ const mockMetrics = {
   ],
   recentActivity: [
     { type: "trip_completed", title: "Trip #1234 completed", createdAt: new Date().toISOString(), amountCents: 25000 },
-    { type: "new_driver", title: "Driver John Doe registered", createdAt: new Date().toISOString() },
+    { type: "new_caregiver", title: "caregiver John Doe registered", createdAt: new Date().toISOString() },
     { type: "payment", title: "Payment received", createdAt: new Date().toISOString(), amountCents: 15000 },
   ]
 };
@@ -275,40 +275,40 @@ export const userService = {
   }
 };
 
-export const driverService = {
+export const caregiverService = {
   async getAll() {
-    return new Promise(resolve => setTimeout(() => resolve(mockDrivers), 500));
+    return new Promise(resolve => setTimeout(() => resolve(mockcaregivers), 500));
   },
 
   async getById(id: string) {
     return new Promise(resolve => setTimeout(() => {
-      const driver = mockDrivers.find(d => d.id === id);
-      resolve(driver || null);
+      const caregiver = mockcaregivers.find(d => d.id === id);
+      resolve(caregiver || null);
     }, 300));
   },
 
   async create(data: any) {
     return new Promise(resolve => setTimeout(() => {
-      const newId = (mockDrivers.length + 1).toString();
-      mockDrivers.push({ ...data, id: newId, createdAt: new Date().toISOString() });
+      const newId = (mockcaregivers.length + 1).toString();
+      mockcaregivers.push({ ...data, id: newId, createdAt: new Date().toISOString() });
       resolve(newId);
     }, 500));
   },
 
   async update(id: string, data: any) {
     return new Promise(resolve => setTimeout(() => {
-      const index = mockDrivers.findIndex(d => d.id === id);
+      const index = mockcaregivers.findIndex(d => d.id === id);
       if (index !== -1) {
-        mockDrivers[index] = { ...mockDrivers[index], ...data };
+        mockcaregivers[index] = { ...mockcaregivers[index], ...data };
       }
     }, 300));
   },
 
   async delete(id: string) {
     return new Promise(resolve => setTimeout(() => {
-      const index = mockDrivers.findIndex(d => d.id === id);
+      const index = mockcaregivers.findIndex(d => d.id === id);
       if (index !== -1) {
-        mockDrivers.splice(index, 1);
+        mockcaregivers.splice(index, 1);
       }
     }, 300));
   }

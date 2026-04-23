@@ -51,7 +51,7 @@ type AnyUser = {
   status: "active" | "suspended";
   trips: number;
   address?: string;
-  role?: "user" | "driver" | "admin";
+  role?: "user" | "caregiver" | "admin";
   createdAt?: string;
 
   // ✅ เพิ่มตรงนี้
@@ -358,7 +358,7 @@ export default function Users() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="user">{t("pages.users.roles.user")}</SelectItem>
-                        <SelectItem value="driver">{t("pages.users.roles.driver")}</SelectItem>
+                        <SelectItem value="caregiver">{t("pages.users.roles.caregiver")}</SelectItem>
                         <SelectItem value="admin">{t("pages.users.roles.admin")}</SelectItem>
                       </SelectContent>
                     </Select>

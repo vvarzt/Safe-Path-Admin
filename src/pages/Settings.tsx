@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Link } from "react-router-dom";
 import { History } from "lucide-react";
 
-type Role = "admin" | "user" | "driver";
+type Role = "admin" | "user" | "caregiver";
 type RequirementKind = "input" | "file" | "heading";
 
 interface Requirement {
@@ -47,16 +47,16 @@ export default function Settings() {
         },
         {
           id: "2",
-          role: "driver" as Role,
-          name: "Driver License",
+          role: "caregiver" as Role,
+          name: "caregiver License",
           kind: "file" as RequirementKind,
-          description: "Upload your driver license",
+          description: "Upload your caregiver license",
           required: true,
           createdAt: "2024-01-01T00:00:00Z"
         },
         {
           id: "3",
-          role: "driver" as Role,
+          role: "caregiver" as Role,
           name: "Vehicle Registration",
           kind: "file" as RequirementKind,
           description: "Upload vehicle registration document",
@@ -126,7 +126,7 @@ export default function Settings() {
                   <SelectContent>
                     <SelectItem value="admin">{t("pages.createAccount.roles.admin")}</SelectItem>
                     <SelectItem value="user">{t("pages.createAccount.roles.user")}</SelectItem>
-                    <SelectItem value="driver">{t("pages.createAccount.roles.driver")}</SelectItem>
+                    <SelectItem value="caregiver">{t("pages.createAccount.roles.caregiver")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

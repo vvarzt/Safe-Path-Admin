@@ -15,7 +15,8 @@ import {
   Sun,
   Moon,
   Settings as SettingsIcon,
-  History as HistoryIcon
+  History as HistoryIcon,
+  DollarSign
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
@@ -25,10 +26,10 @@ const navigation = [
   { key: "nav.users", href: "/users", icon: Users },
   { key: "nav.admins", href: "/admins", icon: Users },
   { key: "nav.createAccount", href: "/create-account", icon: Users },
-  { key: "nav.drivers", href: "/drivers", icon: Car },
+  { key: "nav.caregivers", href: "/caregivers", icon: Car },
   { key: "nav.trips", href: "/trips", icon: Route },
   { key: "nav.payments", href: "/payments", icon: CreditCard },
-  { key: "nav.notifications", href: "/notifications", icon: Bell },
+  { key: "nav.withdrawals", href: "/withdrawals", icon: DollarSign },
   { key: "nav.reports", href: "/reports", icon: FileText },
   { key: "nav.settings", href: "/settings", icon: SettingsIcon },
   { key: "nav.settingsHistory", href: "/settings/history", icon: HistoryIcon },

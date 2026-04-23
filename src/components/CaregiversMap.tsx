@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 // import api from "@/lib/api";
 
-interface Driver {
+interface caregiver {
   id: number;
   name: string;
   phone: string;
@@ -24,7 +24,7 @@ interface Driver {
   currentTrip?: string;
 }
 
-type DriverApi = {
+type caregiversApi = {
   id: number;
   name: string;
   phone: string;
@@ -38,23 +38,23 @@ type DriverApi = {
   currentTrip?: string | null;
 };
 
-export default function DriverMap() {
+export default function caregiversMap() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
   const markers = useRef<MapLibreMarker[]>([]);
   const [isMapReady, setIsMapReady] = useState(false);
-  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
-  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [selectedcaregiver, setSelectedcaregiver] = useState<caregiver | null>(null);
+  const [caregivers, setcaregivers] = useState<caregiver[]>([]);
   const movementTimer = useRef<number | null>(null);
   const [incidents, setIncidents] = useState<{ id: string; lat: number; lng: number; time: number }[]>([]);
-  const [notifiedDriverIds, setNotifiedDriverIds] = useState<number[]>([]);
+  const [notifiedcaregiversIds, setNotifiedcaregiversIds] = useState<number[]>([]);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
-  const [nearbyForAssign, setNearbyForAssign] = useState<Driver[]>([]);
+  const [nearbyForAssign, setNearbyForAssign] = useState<caregiver[]>([]);
   const { toast } = useToast();
 
-  const { data, isLoading, isError, refetch } = useQuery<DriverApi[]>({
-    queryKey: ["drivers-map"],
-    queryFn: async () => (await api.get("/drivers")).data,
+  const { data, isLoading, isError, refetch } = useQuery<caregiversApi[]>({
+    queryKey: ["caregivers-map"],
+    queryFn: async () => (await api.get("/caregivers")).data,
     // poll more frequently for near real-time updates
     refetchInterval: 3000,
   });
@@ -126,7 +126,7 @@ export default function DriverMap() {
 
     map.current.on("load", () => {
       setIsMapReady(true);
-      addDriverMarkers();
+      addcaregiversMarkers();
     });
 
     map.current.on("click", (e) => {
@@ -143,8 +143,8 @@ export default function DriverMap() {
 
       setIncidents((prev) => [{ id, lat, lng, time: Date.now() }, ...prev].slice(0, 5));
 
-      const nearby = drivers.filter((d) => haversineKm(d.location, { lat, lng }) <= 2);
-      setNotifiedDriverIds(nearby.map((d) => d.id));
+      const nearby = caregivers.filter((d) => haversineKm(d.location, { lat, lng }) <= 2);
+      setNotifiedcaregiversIds(nearby.map((d) => d.id));
 
       // Draw 2km area
       const circleData = polygonCircle(lng, lat, 2);
@@ -168,7 +168,7 @@ export default function DriverMap() {
 
       toast({
         title: "Incident reported",
-        description: `${nearby.length} drivers notified within 2 km`,
+        description: `${nearby.length} caregivers notified within 2 km`,
       });
 
       // Play alert sound via Web Audio API
@@ -193,16 +193,16 @@ export default function DriverMap() {
     });
   };
 
-  const addDriverMarkers = () => {
+  const addcaregiversMarkers = () => {
     if (!map.current) return;
 
     // Clear existing markers
     markers.current.forEach((marker) => marker.remove());
     markers.current = [];
 
-    drivers.forEach((driver) => {
+    caregivers.forEach((caregiver) => {
       const el = document.createElement("div");
-      el.className = "driver-marker";
+      el.className = "caregiver-marker";
       el.style.width = "40px";
       el.style.height = "40px";
       el.style.borderRadius = "50%";
@@ -214,19 +214,19 @@ export default function DriverMap() {
       el.style.justifyContent = "center";
       el.style.fontSize = "20px";
       el.style.backgroundColor =
-        driver.status === "active" ? "hsl(var(--success))" : "hsl(var(--warning))";
+        caregiver.status === "active" ? "hsl(var(--success))" : "hsl(var(--warning))";
       el.innerHTML = "🚗";
 
       el.addEventListener("click", () => {
-        setSelectedDriver(driver);
+        setSelectedcaregiver(caregiver);
         map.current?.flyTo({
-          center: [driver.location.lng, driver.location.lat],
+          center: [caregiver.location.lng, caregiver.location.lat],
           zoom: 15,
         });
       });
 
       const marker = new maplibregl.Marker(el)
-        .setLngLat([driver.location.lng, driver.location.lat])
+        .setLngLat([caregiver.location.lng, caregiver.location.lat])
         .addTo(map.current!);
 
       markers.current.push(marker);
@@ -242,7 +242,7 @@ export default function DriverMap() {
   // Map API data -> local state
   useEffect(() => {
     if (!data) return;
-    const mapped: Driver[] = data.map((d) => ({
+    const mapped: caregiver[] = data.map((d) => ({
       id: d.id,
       name: d.name,
       phone: d.phone,
@@ -255,14 +255,14 @@ export default function DriverMap() {
       },
       currentTrip: d.currentTrip ?? undefined,
     }));
-    setDrivers(mapped);
+    setcaregivers(mapped);
   }, [data]);
 
   useEffect(() => {
     if (isMapReady) {
-      addDriverMarkers();
+      addcaregiversMarkers();
     }
-  }, [drivers, isMapReady]);
+  }, [caregivers, isMapReady]);
 
   // Real-time movement now depends on backend updates; no local simulation
 
@@ -294,34 +294,34 @@ export default function DriverMap() {
           <CardContent className="pt-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <User className="h-5 w-5" />
-              คนขับทั้งหมด ({drivers.length})
+              ผู้ดูแลทั้งหมด ({caregivers.length})
             </h3>
             <div className="space-y-3">
-              {drivers.map((driver) => (
+              {caregivers.map((caregiver) => (
                 <div
-                  key={driver.id}
+                  key={caregiver.id}
                   onClick={() => {
-                    setSelectedDriver(driver);
+                    setSelectedcaregiver(caregiver);
                     map.current?.flyTo({
-                      center: [driver.location.lng, driver.location.lat],
+                      center: [caregiver.location.lng, caregiver.location.lat],
                       zoom: 15,
                     });
                   }}
                   className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md ${
-                    selectedDriver?.id === driver.id
+                    selectedcaregiver?.id === caregiver.id
                       ? "bg-primary/10 border-primary"
                       : "bg-card border-border hover:border-primary/50"
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <div className="font-medium">{driver.name}</div>
+                    <div className="font-medium">{caregiver.name}</div>
                     <div className="flex items-center gap-2">
                       <Badge
-                        variant={driver.status === "active" ? "success" : "secondary"}
+                        variant={caregiver.status === "active" ? "success" : "secondary"}
                       >
-                        {driver.status === "active" ? "ว่าง" : "ให้บริการ"}
+                        {caregiver.status === "active" ? "ว่าง" : "ให้บริการ"}
                       </Badge>
-                      {notifiedDriverIds.includes(driver.id) && (
+                      {notifiedcaregiversIds.includes(caregiver.id) && (
                         <Badge variant="destructive">แจ้งเหตุใกล้คุณ</Badge>
                       )}
                     </div>
@@ -329,11 +329,11 @@ export default function DriverMap() {
                   <div className="space-y-1 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Car className="h-3 w-3" />
-                      {driver.vehicle}
+                      {caregiver.vehicle}
                     </div>
                     <div className="flex items-center gap-2">
                       <Phone className="h-3 w-3" />
-                      {driver.phone}
+                      {caregiver.phone}
                     </div>
                   </div>
                 </div>
@@ -342,42 +342,42 @@ export default function DriverMap() {
           </CardContent>
         </Card>
 
-        {selectedDriver && (
+        {selectedcaregiver && (
           <Card className="border-primary">
             <CardContent className="pt-6">
               <h3 className="font-semibold mb-4">รายละเอียดคนขับ</h3>
               <div className="space-y-3">
                 <div>
                   <div className="text-sm text-muted-foreground">ชื่อ</div>
-                  <div className="font-medium">{selectedDriver.name}</div>
+                  <div className="font-medium">{selectedcaregiver.name}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">เบอร์โทร</div>
-                  <div className="font-medium">{selectedDriver.phone}</div>
+                  <div className="font-medium">{selectedcaregiver.phone}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">ยานพาหนะ</div>
-                  <div className="font-medium">{selectedDriver.vehicle}</div>
+                  <div className="font-medium">{selectedcaregiver.vehicle}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">ทะเบียน</div>
-                  <div className="font-medium">{selectedDriver.license}</div>
+                  <div className="font-medium">{selectedcaregiver.license}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">สถานะ</div>
                   <Badge
                     variant={
-                      selectedDriver.status === "active" ? "success" : "secondary"
+                      selectedcaregiver.status === "active" ? "success" : "secondary"
                     }
                   >
-                    {selectedDriver.status === "active" ? "พร้อมให้บริการ" : "กำลังให้บริการ"}
+                    {selectedcaregiver.status === "active" ? "พร้อมให้บริการ" : "กำลังให้บริการ"}
                   </Badge>
                 </div>
-                {selectedDriver.currentTrip && (
+                {selectedcaregiver.currentTrip && (
                   <div>
                     <div className="text-sm text-muted-foreground">งานปัจจุบัน</div>
                     <div className="font-medium text-sm">
-                      {selectedDriver.currentTrip}
+                      {selectedcaregiver.currentTrip}
                     </div>
                   </div>
                 )}

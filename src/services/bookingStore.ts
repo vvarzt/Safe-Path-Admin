@@ -5,7 +5,7 @@ interface BookingData {
   toLocation?: { lat: number; lng: number; address?: string } | null;
   date?: string;
   time?: string;
-  passengerType?: string;
+  gender_Care?: string;
   equipment?: string[];
   distance?: number;
   fare?: number;

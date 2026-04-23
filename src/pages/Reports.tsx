@@ -21,7 +21,7 @@ export default function Reports() {
 
   const [metrics, setMetrics] = useState<{
     totalUsers?: number;
-    activeDrivers?: number;
+    activecaregivers?: number;
     totalTrips?: number;
     revenueCents?: number;
     cancellationRate?: number;
@@ -80,7 +80,25 @@ export default function Reports() {
     }
     return {};
   };
-
+  const reportStats = [
+    { label: "Total Trips", value: metrics.totalTrips ?? "-" },
+    { label: "Total Users", value: metrics.totalUsers ?? "-" },
+    { label: "Active caregivers", value: metrics.activecaregivers ?? "-" },
+    {
+      label: "Total Revenue",
+      value:
+        typeof metrics.revenueCents === "number"
+          ? `฿${(metrics.revenueCents / 100).toLocaleString()}`
+          : "-",
+    },
+    {
+      label: "Cancellation Rate",
+      value:
+        typeof metrics.cancellationRate === "number"
+          ? `${metrics.cancellationRate}%`
+          : "-",
+    },
+  ];
   const handleGenerateReport = async () => {
     try {
       const { start, end } = resolveDateRange();
@@ -262,8 +280,8 @@ export default function Reports() {
                   <div className="text-2xl font-bold mt-1">{metrics.totalUsers ?? ""}</div>
                 </div>
                 <div className="p-4 rounded-lg bg-muted">
-                  <div className="text-sm text-muted-foreground">Active Drivers</div>
-                  <div className="text-2xl font-bold mt-1">{metrics.activeDrivers ?? ""}</div>
+                  <div className="text-sm text-muted-foreground">Active caregivers</div>
+                  <div className="text-2xl font-bold mt-1">{metrics.activecaregivers ?? ""}</div>
                 </div>
                 <div className="p-4 rounded-lg bg-muted">
                   <div className="text-sm text-muted-foreground">Total Revenue</div>

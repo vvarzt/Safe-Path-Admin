@@ -15,7 +15,7 @@ import { requirementsService, userService, adminService } from "@/services/mockS
 
 export default function CreateAccount() {
   const { t } = useTranslation();
-  const [role, setRole] = useState<"user" | "driver" | "admin">("user");
+  const [role, setRole] = useState<"user" | "caregiver" | "admin">("user");
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [isValid, setIsValid] = useState(false);
@@ -114,7 +114,7 @@ export default function CreateAccount() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">{t("pages.createAccount.roles.user")}</SelectItem>
-                  <SelectItem value="driver">{t("pages.createAccount.roles.driver")}</SelectItem>
+                  <SelectItem value="caregiver">{t("pages.createAccount.roles.caregiver")}</SelectItem>
                   <SelectItem value="admin">{t("pages.createAccount.roles.admin")}</SelectItem>
                 </SelectContent>
               </Select>
@@ -190,73 +190,73 @@ export default function CreateAccount() {
           </CardContent>
         </Card>
 
-        {role === "driver" && (
+        {role === "caregiver" && (
           <>
             <Card className="card-elevated">
               <CardHeader>
-                <CardTitle>{t("pages.createAccount.sections.driverInfo")}</CardTitle>
+                <CardTitle>{t("pages.createAccount.sections.caregiverInfo")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="vehicleMake">{t("createAccount.fields.vehicleMake")}</Label>
-                    <Input id="vehicleMake" required={role === "driver"} />
+                    <Input id="vehicleMake" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vehicleModel">{t("createAccount.fields.vehicleModel")}</Label>
-                    <Input id="vehicleModel" required={role === "driver"} />
+                    <Input id="vehicleModel" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vehicleYear">{t("createAccount.fields.vehicleYear")}</Label>
-                    <Input id="vehicleYear" type="number" required={role === "driver"} />
+                    <Input id="vehicleYear" type="number" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vehicleColor">{t("createAccount.fields.vehicleColor")}</Label>
-                    <Input id="vehicleColor" required={role === "driver"} />
+                    <Input id="vehicleColor" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="plateNumber">{t("createAccount.fields.plateNumber")}</Label>
-                    <Input id="plateNumber" required={role === "driver"} />
+                    <Input id="plateNumber" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vehicleType">{t("createAccount.fields.vehicleType")}</Label>
-                    <Input id="vehicleType" required={role === "driver"} />
+                    <Input id="vehicleType" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="capacity">{t("createAccount.fields.capacity")}</Label>
-                    <Input id="capacity" type="number" required={role === "driver"} />
+                    <Input id="capacity" type="number" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="insurancePolicy">{t("createAccount.fields.insurancePolicy")}</Label>
-                    <Input id="insurancePolicy" required={role === "driver"} />
+                    <Input id="insurancePolicy" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="insuranceExpiry">{t("createAccount.fields.insuranceExpiry")}</Label>
-                    <Input id="insuranceExpiry" type="date" required={role === "driver"} />
+                    <Input id="insuranceExpiry" type="date" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="driverLicenseNumber">{t("createAccount.fields.driverLicenseNumber")}</Label>
-                    <Input id="driverLicenseNumber" required={role === "driver"} />
+                    <Label htmlFor="caregiverLicenseNumber">{t("createAccount.fields.caregiverLicenseNumber")}</Label>
+                    <Input id="caregiverLicenseNumber" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="driverLicenseExpiry">{t("createAccount.fields.driverLicenseExpiry")}</Label>
-                    <Input id="driverLicenseExpiry" type="date" required={role === "driver"} />
+                    <Label htmlFor="caregiverLicenseExpiry">{t("createAccount.fields.caregiverLicenseExpiry")}</Label>
+                    <Input id="caregiverLicenseExpiry" type="date" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="experienceYears">{t("createAccount.fields.experienceYears")}</Label>
-                    <Input id="experienceYears" type="number" required={role === "driver"} />
+                    <Input id="experienceYears" type="number" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="emergencyContactName">{t("createAccount.fields.emergencyContactName")}</Label>
-                    <Input id="emergencyContactName" required={role === "driver"} />
+                    <Input id="emergencyContactName" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="emergencyContactPhone">{t("createAccount.fields.emergencyContactPhone")}</Label>
-                    <Input id="emergencyContactPhone" required={role === "driver"} />
+                    <Input id="emergencyContactPhone" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="additionalNotes">{t("createAccount.fields.additionalNotes")}</Label>
-                    <Input id="additionalNotes" required={role === "driver"} />
+                    <Input id="additionalNotes" required={role === "caregiver"} />
                   </div>
                 </div>
               </CardContent>
@@ -270,15 +270,15 @@ export default function CreateAccount() {
                 <div className="grid gap-6 md:grid-cols-3">
                   <div className="space-y-2">
                     <Label htmlFor="licenseScan">{t("createAccount.fields.licenseScan")}</Label>
-                    <Input id="licenseScan" type="file" accept="image/*,application/pdf" required={role === "driver"} />
+                    <Input id="licenseScan" type="file" accept="image/*,application/pdf" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="registrationDoc">{t("createAccount.fields.registrationDoc")}</Label>
-                    <Input id="registrationDoc" type="file" accept="image/*,application/pdf" required={role === "driver"} />
+                    <Input id="registrationDoc" type="file" accept="image/*,application/pdf" required={role === "caregiver"} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="insuranceDoc">{t("createAccount.fields.insuranceDoc")}</Label>
-                    <Input id="insuranceDoc" type="file" accept="image/*,application/pdf" required={role === "driver"} />
+                    <Input id="insuranceDoc" type="file" accept="image/*,application/pdf" required={role === "caregiver"} />
                   </div>
                 </div>
               </CardContent>

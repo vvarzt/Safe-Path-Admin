@@ -7,10 +7,10 @@ import "./i18n";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
-import Drivers from "./pages/Drivers";
+import caregivers from "./pages/Caregivers";
 import Trips from "./pages/Trips";
 import Payments from "./pages/Payments";
-import Notifications from "./pages/Notifications";
+import Withdrawals from "./pages/Withdrawals";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import CreateAccount from "./pages/CreateAccount";
@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import Admins from "./pages/Admins";
 import Settings from "./pages/Settings";
 import SettingsHistory from "./pages/SettingsHistory";
+import Caregivers from "./pages/Caregivers";
 
 const queryClient = new QueryClient();
 
@@ -38,10 +39,10 @@ const App = () => (
           <Route path="/" element={<Login />} />
           <Route path="/dashboard" element={<RequireAdmin><Dashboard /></RequireAdmin>} />
           <Route path="/users" element={<RequireAdmin><Users /></RequireAdmin>} />
-          <Route path="/drivers" element={<RequireAdmin><Drivers /></RequireAdmin>} />
+          <Route path="/caregivers" element={<RequireAdmin><Caregivers /></RequireAdmin>} />
           <Route path="/trips" element={<RequireAdmin><Trips /></RequireAdmin>} />
           <Route path="/payments" element={<RequireAdmin><Payments /></RequireAdmin>} />
-          <Route path="/notifications" element={<RequireAdmin><Notifications /></RequireAdmin>} />
+          <Route path="/withdrawals" element={<RequireAdmin><Withdrawals /></RequireAdmin>} />
           <Route path="/reports" element={<RequireAdmin><Reports /></RequireAdmin>} />
           <Route path="/profile" element={<RequireAdmin><Profile /></RequireAdmin>} />
           <Route path="/create-account" element={<RequireAdmin><CreateAccount /></RequireAdmin>} />

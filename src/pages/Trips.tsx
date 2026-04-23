@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 type TripApi = {
   id: number;
   rider?: { id: number; name: string | null } | null;
-  driver?: { id: number; name: string | null } | null;
+  caregiver?: { id: number; name: string | null } | null;
   fromAddress: string;
   toAddress: string;
   status: string;
@@ -39,61 +39,81 @@ export default function Trips() {
     setDateTo("");
   };
   const { t } = useTranslation();
-  const { data, isLoading, isError } = useQuery<any[]>({
-    queryKey: ["trips"],
-    queryFn: async () => {
-      return new Promise(async (resolve) => {
 
-        // 🔥 ดึง users ทั้งหมดก่อน
+
+  const [rows, setRows] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    let unsubscribe: any;
+
+    const load = async () => {
+      try {
         const usersSnapshot = await getDocs(collection(db, "users"));
 
         const userMap: Record<string, string> = {};
-
         usersSnapshot.forEach(doc => {
           const u = doc.data();
-
-          userMap[doc.id] = u.fullName || "Unknown"; // ✅ ใช้ doc.id
+          userMap[doc.id] = u.fullName || "Unknown";
         });
 
-        // 🔥 ฟัง bookings แบบ realtime
-        const unsub = onSnapshot(collection(db, "bookings"), (snapshot) => {
-          const data = snapshot.docs.map(docSnap => {
-            const d = docSnap.data();
+        unsubscribe = onSnapshot(
+          collection(db, "bookings"),
+          (snapshot) => {
+            const data = snapshot.docs.map(docSnap => {
+              const d = docSnap.data();
 
-            const bookingDate = parseThaiDateTime(d.dateBooking, d.timeBooking);
+              const bookingDate = parseThaiDateTime(
+                d.dateBooking,
+                d.timeBooking
+              );
 
-            return {
-              id: docSnap.id,
-              user: userMap[d.userId] || "Unknown",
-              driver: d.caregiverName || "wait caregiver",
-              from: d.fromAddress || "-",
-              to: d.toAddress || "-",
+              return {
+                id: docSnap.id,
+                user: userMap[d.userId] || "Unknown",
+                caregiver: d.caregiverName || "wait caregiver",
+                from: d.fromLocation?.address || "-",
+                to: d.toLocation?.address || "-",
+                rawDate: bookingDate,
+                date: bookingDate
+                  ? formatThaiDateTime(bookingDate)
+                  : "-",
+                status: d.status || "pending",
+                amount: `฿ ${(d.fare || 0).toLocaleString()}`,
+              };
+            });
 
-              rawDate: bookingDate,
-              date: bookingDate ? formatThaiDateTime(bookingDate) : "-",
+            setRows(data);
+            setIsLoading(false);
+          },
+          () => {
+            setIsError(true);
+            setIsLoading(false);
+          }
+        );
+      } catch (err) {
+        setIsError(true);
+        setIsLoading(false);
+      }
+    };
 
-              status: d.status || "pending",
-              amount: `฿ ${(d.fare || 0).toLocaleString()}`,
-            };
-          });
+    load();
 
-          resolve(data);
-        });
-      });
-    },
-  });
+    return () => unsubscribe && unsubscribe();
+  }, []);
 
   const fmtAmount = (cents?: number | null) =>
     typeof cents === "number" ? `฿${(cents / 100).toFixed(0)}` : "฿0";
 
-  const rows = data ?? [];
+
   const filteredTrips = rows.filter((trip) => {
     const keyword = searchTerm.toLowerCase();
 
     const searchString = [
       trip.id,
       trip.user,
-      trip.driver,
+      trip.caregiver,
       trip.from,
       trip.to,
       trip.date,
@@ -135,6 +155,7 @@ export default function Trips() {
     switch (status) {
       case "completed": return "success";
       case "pending": return "secondary";
+      case "accepted": return "default"; // 
       case "cancelled": return "destructive";
       default: return "outline";
     }
@@ -145,6 +166,7 @@ export default function Trips() {
       case "completed": return t("pages.trips.status.completed");
       case "pending": return t("pages.trips.status.pending");
       case "cancelled": return t("pages.trips.status.cancelled");
+      case "accepted": return "Accepted";
       default: return status;
     }
   };
@@ -239,6 +261,7 @@ export default function Trips() {
                     <SelectItem value="completed">{t("pages.trips.status.completed")}</SelectItem>
                     <SelectItem value="pending">{t("pages.trips.status.pending")}</SelectItem>
                     <SelectItem value="cancelled">{t("pages.trips.status.cancelled")}</SelectItem>
+                    <SelectItem value="accepted">Accepted</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -268,7 +291,7 @@ export default function Trips() {
                 <TableRow>
                   <TableHead>{t("pages.trips.table.tripId")}</TableHead>
                   <TableHead>{t("pages.trips.table.user")}</TableHead>
-                  <TableHead>{t("pages.trips.table.driver")}</TableHead>
+                  <TableHead>{t("pages.trips.table.caregiver")}</TableHead>
                   <TableHead>{t("pages.trips.table.route")}</TableHead>
                   <TableHead>{t("pages.trips.table.datetime")}</TableHead>
                   <TableHead>{t("pages.trips.table.amount")}</TableHead>
@@ -283,12 +306,12 @@ export default function Trips() {
                       <span className="whitespace-nowrap">{trip.user}</span>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {trip.driver === "wait caregiver" ? (
+                      {trip.caregiver === "wait caregiver" ? (
                         <Badge className="bg-yellow-400 text-black px-3 py-1 whitespace-nowrap">
                           wait caregiver
                         </Badge>
                       ) : (
-                        <span className="whitespace-nowrap">{trip.driver}</span>
+                        <span className="whitespace-nowrap">{trip.caregiver}</span>
                       )}
                     </TableCell>
                     <TableCell>

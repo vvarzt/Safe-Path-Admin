@@ -10,12 +10,12 @@ import { db } from "@/firebase";
 
 const BASE_STATS = [
   { key: "stats.totalUsers", value: "-", icon: Users, change: "" },
-  { key: "stats.activeDrivers", value: "-", icon: Car, change: "" },
+  { key: "stats.activecaregivers", value: "-", icon: Car, change: "" },
   { key: "stats.totalTrips", value: "-", icon: Route, change: "" },
   { key: "stats.revenue", value: "-", icon: DollarSign, change: "" },
   { key: "stats.avgTripTime", value: "-", icon: Timer, change: "" },
   { key: "stats.cancellationRate", value: "-", icon: AlertTriangle, change: "" },
-  { key: "stats.driverUtilization", value: "-", icon: Activity, change: "" },
+  { key: "stats.caregiverUtilization", value: "-", icon: Activity, change: "" },
   { key: "stats.avgRating", value: "4.8", icon: Star, },
 ];
 
@@ -28,12 +28,12 @@ const PIE_COLORS = [
 
 type Metrics = {
   totalUsers: number;
-  activeDrivers: number;
+  activecaregivers: number;
   totalTrips: number;
   revenueCents: number;
   avgTripTime: number;
   cancellationRate: number; // percent
-  driverUtilization: number; // percent
+  caregiverUtilization: number; // percent
   weeklyTrips: { name: string; trips: number }[];
   revenueByDay?: { name: string; revenueCents: number }[];
   tripStatusDistribution?: { status: string; count: number }[];
@@ -49,13 +49,13 @@ export default function Dashboard() {
         // Fetch data from multiple collections in parallel
         const [
           usersSnapshot,
-          driversSnapshot,
+          caregiversSnapshot,
           bookingsSnapshot,
           paymentsSnapshot,
           notificationsSnapshot
         ] = await Promise.all([
           getDocs(collection(db, 'users')),
-          getDocs(collection(db, 'drivers')),
+          getDocs(collection(db, 'caregivers')),
           getDocs(collection(db, 'bookings')),
           getDocs(collection(db, 'payments')),
           getDocs(query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(10)))
@@ -64,7 +64,7 @@ export default function Dashboard() {
         // Calculate metrics
         const totalUsers = usersSnapshot.size;
         console.log("Total users:", totalUsers);
-        const activeDrivers = driversSnapshot.size; // Assume all drivers are active
+        const activecaregivers = caregiversSnapshot.size; // Assume all caregivers are active
         const totalTrips = bookingsSnapshot.size;
 
         // Calculate total revenue from completed payments
@@ -96,7 +96,7 @@ export default function Dashboard() {
         // Default values for complex calculations (can be improved later)
         const avgTripTime = 25; // TODO: calculate from actual trip data
         const cancellationRate = 3.2; // TODO: calculate from cancelled trips
-        const driverUtilization = 78.5; // TODO: calculate from driver activity
+        const caregiverUtilization = 78.5; // TODO: calculate from caregiver activity
 
         // Default weekly data (can be improved with date queries)
         const weeklyTrips = [
@@ -121,12 +121,12 @@ export default function Dashboard() {
 
         return {
           totalUsers,
-          activeDrivers,
+          activecaregivers,
           totalTrips,
           revenueCents,
           avgTripTime,
           cancellationRate,
-          driverUtilization,
+          caregiverUtilization,
           weeklyTrips,
           revenueByDay,
           tripStatusDistribution,
@@ -137,12 +137,12 @@ export default function Dashboard() {
         // Return default values if Firebase fails
         return {
           totalUsers: 0,
-          activeDrivers: 0,
+          activecaregivers: 0,
           totalTrips: 0,
           revenueCents: 0,
           avgTripTime: 0,
           cancellationRate: 0,
-          driverUtilization: 0,
+          caregiverUtilization: 0,
           weeklyTrips: [
             { name: "Mon", trips: 0 },
             { name: "Tue", trips: 0 },
@@ -182,12 +182,12 @@ export default function Dashboard() {
     if (m) {
       switch (s.key) {
         case "stats.totalUsers": value = fmt(m.totalUsers); break;
-        case "stats.activeDrivers": value = fmt(m.activeDrivers); break;
+        case "stats.activecaregivers": value = fmt(m.activecaregivers); break;
         case "stats.totalTrips": value = fmt(m.totalTrips); break;
         case "stats.revenue": value = money(m.revenueCents); break;
         case "stats.avgTripTime": value = m.avgTripTime ? `${m.avgTripTime}m` : "0m"; break;
         case "stats.cancellationRate": value = `${m.cancellationRate}%`; break;
-        case "stats.driverUtilization": value = `${m.driverUtilization}%`; break;
+        case "stats.caregiverUtilization": value = `${m.caregiverUtilization}%`; break;
       }
     }
     return { ...s, title: t(s.key), value };
