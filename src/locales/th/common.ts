@@ -7,7 +7,7 @@ const th = {
     users: "ผู้ใช้",
     admins: "แอดมิน",
     caregivers: "ผู้ดูแล",
-    trips: "การเดินทาง",
+    trips: "การจอง",
     payments: "การชำระเงิน",
     withdrawals: "คำขอถอนเงิน",
     reports: "รายงาน",
@@ -248,7 +248,7 @@ const th = {
       loadError: "โหลดข้อมูลคนขับล้มเหลว",
     },
     trips: {
-      title: "ประวัติการเดินทาง",
+      title: "ประวัติการจอง",
       subtitle: "ดูรายการทริปทั้งหมด",
       cardTitle: "ทริปทั้งหมด",
       filters: {
@@ -344,7 +344,7 @@ const th = {
     notifications: {
       title: "การแจ้งเตือน",
       subtitle: "จัดการเทมเพลตและการตั้งค่าการแจ้งเตือน",
-      tripStarted: "เริ่มการเดินทาง",
+      tripStarted: "เริ่มการจอง",
       arrived: "ถึงปลายทาง",
       emergency: "การแจ้งเตือนเหตุฉุกเฉิน",
       payment: "ยืนยันการชำระเงิน",

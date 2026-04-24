@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { 
@@ -19,17 +19,20 @@ import {
   DollarSign
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { db } from "@/firebase";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 
-const navigation = [
+const navigationItems = [
   { key: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
   { key: "nav.users", href: "/users", icon: Users },
   { key: "nav.admins", href: "/admins", icon: Users },
   { key: "nav.createAccount", href: "/create-account", icon: Users },
-  { key: "nav.caregivers", href: "/caregivers", icon: Car },
+  { key: "nav.caregivers", href: "/caregivers", icon: Car, countKey: "caregivers" },
   { key: "nav.trips", href: "/trips", icon: Route },
   { key: "nav.payments", href: "/payments", icon: CreditCard },
-  { key: "nav.withdrawals", href: "/withdrawals", icon: DollarSign },
+  { key: "nav.withdrawals", href: "/withdrawals", icon: DollarSign, countKey: "withdrawals" },
   { key: "nav.reports", href: "/reports", icon: FileText },
   { key: "nav.settings", href: "/settings", icon: SettingsIcon },
   { key: "nav.settingsHistory", href: "/settings/history", icon: HistoryIcon },
@@ -45,6 +48,34 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     typeof window !== "undefined" ? window.innerWidth >= 1024 : false
   );
   const { t, i18n } = useTranslation();
+  const [notificationCounts, setNotificationCounts] = useState({
+    caregivers: 0,
+    withdrawals: 0,
+  });
+
+  useEffect(() => {
+    const caregiverQuery = query(collection(db, "caregivers"), where("isApproved", "==", false));
+    const withdrawalQuery = query(collection(db, "withdrawals"), where("status", "==", "pending"));
+
+    const unsubCaregivers = onSnapshot(caregiverQuery, (snap) => {
+      setNotificationCounts((prev) => ({ ...prev, caregivers: snap.size }));
+    });
+
+    const unsubWithdrawals = onSnapshot(withdrawalQuery, (snap) => {
+      setNotificationCounts((prev) => ({ ...prev, withdrawals: snap.size }));
+    });
+
+    return () => {
+      unsubCaregivers();
+      unsubWithdrawals();
+    };
+  }, []);
+
+  const navigation = navigationItems.map((item) => ({
+    ...item,
+    count: item.countKey ? notificationCounts[item.countKey as keyof typeof notificationCounts] : undefined,
+  }));
+
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     const saved = localStorage.getItem("theme");
@@ -125,7 +156,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   onClick={() => setIsSidebarOpen(false)}
                 >
                   <Icon className="h-5 w-5" />
-                  <span className="font-medium">{t(item.key)}</span>
+                  <span className="font-medium flex-1">{t(item.key)}</span>
+                  {item.count ? (
+                    <Badge variant="secondary" className="min-w-[1.5rem] px-2 py-0.5 text-[0.65rem]">
+                      {item.count}
+                    </Badge>
+                  ) : null}
                 </Link>
               );
             })}

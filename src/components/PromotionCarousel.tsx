@@ -36,7 +36,7 @@ const promotions: Promotion[] = [
   {
     id: '3',
     title: 'ลด 100 บาท',
-    description: 'สำหรับการเดินทางระยะไกล',
+    description: 'สำหรับการจองระยะไกล',
     discount: '฿100',
     color: '#95E1D3',
     icon: 'car',

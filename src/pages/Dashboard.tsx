@@ -45,96 +45,109 @@ export default function Dashboard() {
   const { data: metrics } = useQuery<Metrics>({
     queryKey: ["metrics"],
     queryFn: async () => {
+      const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const ORDER = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+      const emptyWeekly = () => ORDER.map((name) => ({ name, trips: 0 }));
+      const emptyRevenue = () => ORDER.map((name) => ({ name, revenueCents: 0 }));
+
       try {
-        // Fetch data from multiple collections in parallel
-        const [
-          usersSnapshot,
-          caregiversSnapshot,
-          bookingsSnapshot,
-          paymentsSnapshot,
-          notificationsSnapshot
-        ] = await Promise.all([
-          getDocs(collection(db, 'users')),
-          getDocs(collection(db, 'caregivers')),
-          getDocs(collection(db, 'bookings')),
-          getDocs(collection(db, 'payments')),
-          getDocs(query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(10)))
+        const [usersSnapshot, caregiversSnapshot, bookingsSnapshot] = await Promise.all([
+          getDocs(collection(db, "users")),
+          getDocs(collection(db, "caregivers")),
+          getDocs(query(collection(db, "bookings"), orderBy("createdAt", "desc"))),
         ]);
 
-        // Calculate metrics
         const totalUsers = usersSnapshot.size;
-        console.log("Total users:", totalUsers);
-        const activecaregivers = caregiversSnapshot.size; // Assume all caregivers are active
-        const totalTrips = bookingsSnapshot.size;
+        const activecaregivers = caregiversSnapshot.size;
 
-        // Calculate total revenue from completed payments
-        let revenueCents = 0;
-        paymentsSnapshot.forEach(doc => {
-          const data = doc.data();
-          if (data.status === "completed") {
-            const amount = data.amount;
-            if (amount != null) {
-              const numAmount = Number(amount);
-              console.log(`Payment ${doc.id}: ${numAmount}`);
-              revenueCents += numAmount;
+        // last 7 days window
+        const now = new Date();
+        const sevenDaysAgo = new Date(now);
+        sevenDaysAgo.setDate(now.getDate() - 6);
+        sevenDaysAgo.setHours(0, 0, 0, 0);
+
+        const weeklyMap: Record<string, number> = Object.fromEntries(ORDER.map((d) => [d, 0]));
+        const revenueMap: Record<string, number> = Object.fromEntries(ORDER.map((d) => [d, 0]));
+        const statusCount: Record<string, number> = {};
+
+        let totalTrips = 0;
+        let totalRevenue = 0;
+        let totalTripMinutes = 0;
+        let tripsWithTime = 0;
+        let cancelledCount = 0;
+        const recentActivity: Metrics["recentActivity"] = [];
+
+        bookingsSnapshot.forEach((doc) => {
+          const d = doc.data();
+          totalTrips++;
+
+          // status distribution
+          const st: string = d.status || "pending";
+          statusCount[st] = (statusCount[st] ?? 0) + 1;
+          if (st === "cancelled") cancelledCount++;
+
+          // revenue — fare is already in THB
+          if (st === "completed" && typeof d.fare === "number") {
+            totalRevenue += d.fare;
+          }
+
+          // avg trip time: startedAt → completedAt
+          if (d.startedAt && d.completedAt) {
+            const start = new Date(d.startedAt).getTime();
+            const end = new Date(d.completedAt).getTime();
+            if (!isNaN(start) && !isNaN(end) && end > start) {
+              totalTripMinutes += (end - start) / 60000;
+              tripsWithTime++;
             }
           }
+
+          // weekly bucketing
+          if (d.createdAt) {
+            const created = new Date(d.createdAt);
+            if (created >= sevenDaysAgo) {
+              const dayKey = DAY_NAMES[created.getDay()];
+              weeklyMap[dayKey] = (weeklyMap[dayKey] ?? 0) + 1;
+              if (st === "completed" && typeof d.fare === "number") {
+                revenueMap[dayKey] = (revenueMap[dayKey] ?? 0) + d.fare;
+              }
+            }
+          }
+
+          // recent activity — latest 10
+          if (recentActivity.length < 10) {
+            recentActivity.push({
+              type: st,
+              title: `${d.fromLocation?.address ?? "?"} → ${d.toLocation?.address ?? "?"}`,
+              createdAt: d.createdAt || new Date().toISOString(),
+              amountCents: typeof d.fare === "number" ? d.fare : null,
+            });
+          }
         });
-        console.log("Total revenue:", revenueCents);
 
-        // Get recent activity from notifications
-        const recentActivity = notificationsSnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            type: data.type || 'activity',
-            title: data.title || 'Activity',
-            createdAt: data.createdAt || new Date().toISOString(),
-            amountCents: data.amountCents || null
-          };
-        });
+        const weeklyTrips = ORDER.map((name) => ({ name, trips: weeklyMap[name] ?? 0 }));
+        const revenueByDay = ORDER.map((name) => ({ name, revenueCents: revenueMap[name] ?? 0 }));
+        const tripStatusDistribution = Object.entries(statusCount).map(([status, count]) => ({ status, count }));
 
-        // Default values for complex calculations (can be improved later)
-        const avgTripTime = 25; // TODO: calculate from actual trip data
-        const cancellationRate = 3.2; // TODO: calculate from cancelled trips
-        const caregiverUtilization = 78.5; // TODO: calculate from caregiver activity
-
-        // Default weekly data (can be improved with date queries)
-        const weeklyTrips = [
-          { name: "Mon", trips: 0 },
-          { name: "Tue", trips: 0 },
-          { name: "Wed", trips: 0 },
-          { name: "Thu", trips: 0 },
-          { name: "Fri", trips: 0 },
-          { name: "Sat", trips: 0 },
-          { name: "Sun", trips: 0 },
-        ];
-
-        const revenueByDay = weeklyTrips.map(d => ({ name: d.name, revenueCents: 0 }));
-
-        // Default trip status distribution (can be improved with aggregation)
-        const tripStatusDistribution = [
-          { status: "completed", count: totalTrips },
-          { status: "cancelled", count: 0 },
-          { status: "in_progress", count: 0 },
-          { status: "pending", count: 0 },
-        ];
+        const avgTripTime = tripsWithTime > 0 ? Math.round(totalTripMinutes / tripsWithTime) : 0;
+        const cancellationRate = totalTrips > 0 ? parseFloat(((cancelledCount / totalTrips) * 100).toFixed(1)) : 0;
+        const caregiverUtilization = 78.5; // TODO: calculate from caregiver schedule
 
         return {
           totalUsers,
           activecaregivers,
           totalTrips,
-          revenueCents,
+          revenueCents: totalRevenue,
           avgTripTime,
           cancellationRate,
           caregiverUtilization,
           weeklyTrips,
           revenueByDay,
           tripStatusDistribution,
-          recentActivity
+          recentActivity,
         };
       } catch (error) {
         console.error("Error fetching metrics:", error);
-        // Return default values if Firebase fails
         return {
           totalUsers: 0,
           activecaregivers: 0,
@@ -143,31 +156,15 @@ export default function Dashboard() {
           avgTripTime: 0,
           cancellationRate: 0,
           caregiverUtilization: 0,
-          weeklyTrips: [
-            { name: "Mon", trips: 0 },
-            { name: "Tue", trips: 0 },
-            { name: "Wed", trips: 0 },
-            { name: "Thu", trips: 0 },
-            { name: "Fri", trips: 0 },
-            { name: "Sat", trips: 0 },
-            { name: "Sun", trips: 0 },
-          ],
-          revenueByDay: [
-            { name: "Mon", revenueCents: 0 },
-            { name: "Tue", revenueCents: 0 },
-            { name: "Wed", revenueCents: 0 },
-            { name: "Thu", revenueCents: 0 },
-            { name: "Fri", revenueCents: 0 },
-            { name: "Sat", revenueCents: 0 },
-            { name: "Sun", revenueCents: 0 },
-          ],
+          weeklyTrips: emptyWeekly(),
+          revenueByDay: emptyRevenue(),
           tripStatusDistribution: [
             { status: "completed", count: 0 },
             { status: "cancelled", count: 0 },
             { status: "in_progress", count: 0 },
             { status: "pending", count: 0 },
           ],
-          recentActivity: []
+          recentActivity: [],
         };
       }
     }
@@ -204,8 +201,10 @@ export default function Dashboard() {
   ];
 
   const revenueData = (metrics?.revenueByDay ?? weeklyData.map(d => ({ name: d.name, revenueCents: 0 })))
-    .map(d => ({ name: d.name, revenue: Math.round((d.revenueCents || 0) / 100) }));
-
+    .map(d => ({
+      name: d.name,
+      revenue: d.revenueCents || 0 // ✅ เอา /100 ออก
+    }));
   const tripTypeData = (metrics?.tripStatusDistribution ?? [])
     .map((it) => ({ name: it.status, value: it.count }));
 
@@ -267,9 +266,14 @@ export default function Dashboard() {
                 <LineChart data={revenueData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="revenue" stroke="hsl(var(--accent))" strokeWidth={2} />
+                  <YAxis tickFormatter={(v) => v.toLocaleString()} />
+                  <Tooltip formatter={(v: number) => `฿ ${v.toLocaleString()}`} />
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="hsl(var(--accent))"
+                    strokeWidth={2}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>

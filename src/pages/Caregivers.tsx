@@ -27,6 +27,9 @@ export default function Caregivers() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any>(null);
   const [open, setOpen] = useState(false);
+  const [ratings, setRatings] = useState<Record<string, number>>({});
+
+
 
   function InfoRow({ label, value }: { label: string; value?: string | null }) {
     return (
@@ -86,14 +89,49 @@ export default function Caregivers() {
     return date.toLocaleDateString("th-TH");
   };
 
-  // ✅ โหลดข้อมูล realtime
+  // เพิ่ม useEffect นี้เข้าไปด้วย (แยกจาก useEffect ของ ratings)
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "caregivers"), (snap) => {
-      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-      console.log("DATA:", data); // 👈 เช็คตรงนี้
-
+      const data = snap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setList(data);
+    });
+
+    return () => unsub();
+  }, []);
+
+  // ✅ โหลดข้อมูล realtime
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "bookings"), (snap) => {
+
+      const map: Record<string, { total: number; count: number }> = {};
+
+      snap.docs.forEach((doc) => {
+        const d = doc.data();
+
+        if (d.status !== "completed") return;
+        if (!d.caregiverId) return;
+        if (!d.score) return;
+
+        if (!map[d.caregiverId]) {
+          map[d.caregiverId] = { total: 0, count: 0 };
+        }
+
+        map[d.caregiverId].total += d.score;
+        map[d.caregiverId].count += 1;
+      });
+
+      // แปลงเป็น avg
+      const result: Record<string, number> = {};
+
+      Object.keys(map).forEach((id) => {
+        const { total, count } = map[id];
+        result[id] = Number((total / count).toFixed(1));
+      });
+
+      setRatings(result);
     });
 
     return () => unsub();
@@ -167,6 +205,7 @@ export default function Caregivers() {
                   <TableHead>เบอร์</TableHead>
                   <TableHead>จังหวัด</TableHead>
                   <TableHead>สถานะ</TableHead>
+                  <TableHead>คะแนน</TableHead>
                   <TableHead className="text-right">จัดการ</TableHead>
                 </TableRow>
               </TableHeader>
@@ -189,6 +228,10 @@ export default function Caregivers() {
 
                     <TableCell>
                       {statusBadge(c)}
+                    </TableCell>
+
+                    <TableCell>
+                      {ratings[c.uid] ?? "-"}
                     </TableCell>
 
                     <TableCell className="text-right">

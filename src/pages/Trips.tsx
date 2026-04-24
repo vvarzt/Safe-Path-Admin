@@ -50,14 +50,25 @@ export default function Trips() {
 
     const load = async () => {
       try {
-        const usersSnapshot = await getDocs(collection(db, "users"));
+        // ✅ caregivers
+        const caregiversSnapshot = await getDocs(collection(db, "caregivers"));
+        const caregiverMap: Record<string, string> = {};
 
+        caregiversSnapshot.forEach(doc => {
+          const c = doc.data();
+          caregiverMap[doc.id] = `${c.firstName || ""} ${c.lastName || ""}`;
+        });
+
+        // ✅ users
+        const usersSnapshot = await getDocs(collection(db, "users"));
         const userMap: Record<string, string> = {};
+
         usersSnapshot.forEach(doc => {
           const u = doc.data();
           userMap[doc.id] = u.fullName || "Unknown";
         });
 
+        // ✅ bookings realtime
         unsubscribe = onSnapshot(
           collection(db, "bookings"),
           (snapshot) => {
@@ -72,7 +83,12 @@ export default function Trips() {
               return {
                 id: docSnap.id,
                 user: userMap[d.userId] || "Unknown",
-                caregiver: d.caregiverName || "wait caregiver",
+
+                caregiver:
+                  d.caregiverId
+                    ? caregiverMap[d.caregiverId] || "Unknown"
+                    : "wait caregiver",
+
                 from: d.fromLocation?.address || "-",
                 to: d.toLocation?.address || "-",
                 rawDate: bookingDate,
@@ -92,6 +108,7 @@ export default function Trips() {
             setIsLoading(false);
           }
         );
+
       } catch (err) {
         setIsError(true);
         setIsLoading(false);

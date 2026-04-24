@@ -325,7 +325,7 @@ export default function Withdrawals() {
                     <div key={i} className="bg-muted/40 rounded p-3 text-xs space-y-1">
                       <div className="flex justify-between">
                         <span className="font-mono text-muted-foreground">{b.bookingId?.slice(0, 10)}...</span>
-                        <span className="font-semibold text-green-600">฿{b.income} (60%)</span>
+                        <span className="font-semibold text-green-600">฿{b.income}</span>
                       </div>
                       <div className="flex justify-between text-muted-foreground">
                         <span>ค่าบริการเต็ม: ฿{b.fare}</span>
