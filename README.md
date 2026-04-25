@@ -9,11 +9,10 @@ Follow these steps:
 ### install and run
 
 ```
-# Step 1: Install the necessary dependencies.
-npm i
+# ติดตั้งนะครับ
 
-# Step 2: Start the development server with auto-reloading and an instant preview.
+ npm install
+
 npm run dev
 ```
-
 
